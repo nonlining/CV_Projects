@@ -21,13 +21,13 @@ class Net(nn.Module):
         # As an example, you've been given a convolutional layer, which you may (but don't have to) change:
         # 1 input image channel (grayscale), 32 output channels/feature maps, 5x5 square convolution kernel
 
-        self.conv1 = nn.Conv2d(1, 32, 5, 2, 0)
-        self.conv2 = nn.Conv2d(32, 64, 5, 2, 0)
-        self.conv3 = nn.Conv2d(64, 128, 3, 1, 1)
-        self.conv4 = nn.Conv2d(128, 256, 3, 1, 0)
-        self.conv5 = nn.Conv2d(256, 512, 3, 1, 0)
+        self.conv1 = nn.Conv2d(1, 64, 3, 1, 0)
+        self.conv2 = nn.Conv2d(64, 128, 3, 1, 0)
+        self.conv3 = nn.Conv2d(128, 256, 3, 1, 0)
+        self.conv4 = nn.Conv2d(256, 512, 3, 1, 0)
+        self.conv5 = nn.Conv2d(512, 512, 3, 1, 0)
         self.pool2 = nn.MaxPool2d(2, 2)
-        self.fc1 = nn.Linear(4*4*512, 1024)
+        self.fc1 = nn.Linear(5*5*512, 1024)
         self.fc1_drop = nn.Dropout(p=0.3)
         self.fc2 = nn.Linear(1024, 1024)
         self.fc2_drop = nn.Dropout(p=0.3)
@@ -41,21 +41,19 @@ class Net(nn.Module):
         ## x = self.pool(F.relu(self.conv1(x)))
 
         # Apply convolutional layers
-        x = self.pool2(F.relu(self.conv1(x)))
+        x = self.pool2(F.selu(self.conv1(x)))
         #print(x.shape)
-        x = self.pool2(F.relu(self.conv2(x)))
+        x = self.pool2(F.selu(self.conv2(x)))
         #print(x.shape)
-        x = F.relu(self.conv3(x))
+        x = self.pool2(F.selu(self.conv3(x)))
         #print(x.shape)
-        x = F.relu(self.conv4(x))
+        x = self.pool2(F.selu(self.conv4(x)))
         #print(x.shape)
-        x = self.pool2(F.relu(self.conv5(x)))
+        x = self.pool2(F.selu(self.conv5(x)))
         #print(x.shape)
 
-        # Flatten and continue with dense layers
         x = x.view(x.size(0), -1)
         x = F.selu(self.fc1(x))
-        x = self.fc1_drop(x)
         x = F.selu(self.fc2(x))
         x = self.fc2_drop(x)
         x = self.fc3(x)
